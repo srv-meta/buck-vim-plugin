@@ -27,16 +27,19 @@ A plugin for VIM and NeoVim to simplify working with buck files
 
 It is easiest to use some package manager. Feel free to add snippets here for other package managers
 #### LazyVim
+```
 {
   "srv-meta/buck-vim-plugin",
   config = function()
     vim.keymap.set('n', '<leader>T', vim.fn.BuckOpenTarget, { desc = 'GoTo [T]arget under cursor' })
   end,
 },
+```
 
 
 ## Buck target autocompletion support
 The plugin contains an extention for nvim-cmp. To enable it, add "srv-meta/buck-vim-plugin" as a dependency to nvim-cmp and add 'buck' into its sources list like:
+```
 cmp.setup {
     ...
     source = {
@@ -45,6 +48,8 @@ cmp.setup {
         { name = 'path' },
     }
 }
+```
+
 
 ## Known issues and TODO:
 
