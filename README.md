@@ -25,7 +25,7 @@ A plugin for VIM and NeoVim to simplify working with buck files
 
 ### Neovim
 
-It is easiest to use some package manager. Feel free to add snippets here for other package managers
+Here are copy-paste snippets for some package managers. Feel free to update the page with instructions for other package managers.
 #### LazyVim
 ```
 {
@@ -38,13 +38,13 @@ It is easiest to use some package manager. Feel free to add snippets here for ot
 
 
 ## Buck target autocompletion support
-The plugin contains an extention for nvim-cmp. To enable it, add "srv-meta/buck-vim-plugin" as a dependency to nvim-cmp and add 'buck' into its sources list like:
+The plugin contains an extension for [nvim-cmp](https://github.com/hrsh7th/nvim-cmp). To enable it, add "srv-meta/buck-vim-plugin" as a dependency to nvim-cmp in your package manager and add 'buck' into its sources list like this:
 ```
 cmp.setup {
     ...
     source = {
         { name = 'nvim_lsp' },
-        { name = 'buck' }, -- Should be before 'path' if you use it
+        { name = 'buck' }, -- Should probably be before 'path'
         { name = 'path' },
     }
 }
