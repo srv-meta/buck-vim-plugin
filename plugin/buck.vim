@@ -65,7 +65,7 @@ endfunction
 
 " Tries to map a:path in a form of repo//path/to into a real filepath on the
 " filesytem
-function BuckMapPath(path)
+function BuckMapPath(path, verbose)
     let dspos = stridx(a:path, "//")
     if dspos == -1
         return a:path
@@ -79,7 +79,9 @@ function BuckMapPath(path)
 
     let repopath = BuckGetRepoPathInGivenPath(curfilepath, repo)
     if repopath == ""
-        1echow "Not aware of path for ".a:repo
+        if a:verbose
+            echoerr "Not aware of path for ".a:repo
+        endif
         return ""
     endif
 
@@ -99,7 +101,7 @@ endfunction
 function BuckOpenTarget()
     let target = BuckGetTarget(getline("."), col("."))
     if target == ""
-        1echow "Not a target name"
+        echoerr "Not a target name"
         return
     endif
 
@@ -111,7 +113,7 @@ function BuckOpenTarget()
         return
     endif
 
-    let tpath = BuckMapPath(tpath)
+    let tpath = BuckMapPath(tpath, 1)
     if tpath == ""
         return
     endif
@@ -127,7 +129,7 @@ function BuckOpenTarget()
         execute "silent! tabnew ".filename
         call NavigateToTarget(tname)
     else
-        1echow "No targets found at `".tpath."` =("
+        echoerr "No targets found at `".tpath."` =("
     endif
 endfunction
 command BuckOpenTarget call BuckOpenTarget()
