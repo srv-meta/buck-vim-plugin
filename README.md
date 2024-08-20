@@ -17,7 +17,7 @@ A plugin for VIM and NeoVim to simplify working with buck files
 
 ### Vim
 
-1. Install this as a plugin into your vim using pathogen on something like that. Or simply copy plugin/buck.vim file to .vim/plugin folder
+1. Install this as a plugin into your vim using pathogen on something like that. Or simply copy plugin/buck.vim file to $HOME/.vim/plugin folder
 
 2. Define a hotkey for jumping to a target under cursor, e.g. add following to your .vimrc to bind Ctrl+b for this:
 
