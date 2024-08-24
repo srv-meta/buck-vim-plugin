@@ -59,8 +59,6 @@ cmp.setup {
 
 3. Only targets declared directly in TARGETS or BUCK files are found. If a target constructed dynamically using macro, the plugin will not find it. This can be solved by using 'buck targets' command to discover targets, but it will be quite slow. It is possible to add an option enabling this mode.
 
-4. Target details popup contains first few lines of the file where it is declared. This should contain part of the file with target definition instead.
-
 ## Contributing
 
 You are welcome to submit issues, propose ideas and submit PRs. I'd be very especially happy to approve PRs fixing the issued from above. 

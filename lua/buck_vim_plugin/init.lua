@@ -8,14 +8,12 @@ local constants = {
 
 ---@class buck_vim_plugin.Option
 ---@field public default_repo_path string
----@field public get_cwd fun(): string
+---@field public target_files string[]
 
 ---@type buck_vim_plugin.Option
 local defaults = {
   default_repo_path = "",
-  get_cwd = function(params)
-    return vim.fn.expand(('#%d:p:h'):format(params.context.bufnr))
-  end,
+  target_files = { "BUCK", 'TARGETS' },
 }
 
 source.new = function()
@@ -46,7 +44,7 @@ source.resolve = function(self, completion_item, callback)
   local data = completion_item.data
   if data and data.type ~= 'directory' then
     local ok, documentation = pcall(function()
-      return self:_get_documentation(data.path, constants.max_lines)
+      return self:_get_documentation(completion_item.label, data.path, constants.max_lines)
     end)
     if ok then
       completion_item.documentation = documentation
@@ -102,7 +100,7 @@ source._candidates = function(_, dirname, params, option, callback)
   end
 
   if string.sub(params.context.cursor_before_line, vim.api.nvim_win_get_cursor(0)[2]) == ":" then
-    for _, fname in ipairs({ "BUCK", "TARGETS" }) do
+    for _, fname in ipairs(option.target_files) do
       if vim.loop.fs_stat(dirname .. "/" .. fname) then
         add_targets_from(fname)
       end
@@ -139,34 +137,19 @@ source._validate_option = function(_, params)
   local option = vim.tbl_deep_extend('keep', params.option, defaults)
   vim.validate({
     default_repo_path = { option.default_repo_path, 'string' },
-    get_cwd = { option.get_cwd, 'function' },
+    target_files = { option.target_files, { 'string', 'table' } },
   })
   return option
 end
 
-source._get_documentation = function(_, filename, count)
-  local binary = assert(io.open(filename, 'rb'))
-  local first_kb = binary:read(1024)
-  if first_kb:find('\0') then
-    return { kind = cmp.lsp.MarkupKind.PlainText, value = 'binary file' }
-  end
-
-  local contents = {}
-  for content in first_kb:gmatch("[^\r\n]+") do
-    table.insert(contents, content)
-    if count ~= nil and #contents >= count then
-      break
-    end
-  end
-
-  local filetype = vim.filetype.match({ filename = filename })
-  if not filetype then
-    return { kind = cmp.lsp.MarkupKind.PlainText, value = table.concat(contents, '\n') }
-  end
-
-  table.insert(contents, 1, '```' .. filetype)
-  table.insert(contents, '```')
-  return { kind = cmp.lsp.MarkupKind.Markdown, value = table.concat(contents, '\n') }
+source._get_documentation = function(_, target_name, filename, max_lines)
+  local lncnt = max_lines / 2
+  local cmd = "grep -E -A" ..
+      lncnt .. " -B" .. lncnt .. " --color=none 'name\\s*=\\s*\"" .. target_name .. "\"' " .. filename
+  local handle = io.popen(cmd)
+  local text = handle:read "*a"
+  handle:close()
+  return { kind = cmp.lsp.MarkupKind.Markdown, value = "```\n" .. text .. "\n```" }
 end
 
 return source
