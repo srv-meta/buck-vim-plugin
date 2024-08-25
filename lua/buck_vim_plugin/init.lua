@@ -3,7 +3,8 @@ local cmp = require 'cmp'
 local source = {}
 
 local constants = {
-  max_lines = 20,
+  max_lines = 10,
+  target_name_pattern = '^%s*name%s*=%s*"(.+)"'
 }
 
 ---@class buck_vim_plugin.Option
@@ -83,7 +84,7 @@ source._candidates = function(_, dirname, params, option, callback)
     for line in io.lines(dirname .. "/" .. fname) do
       local l
       local res
-      l, _, res = string.find(line, '^%s*name%s*=%s*"(.+)"')
+      l, _, res = string.find(line, constants.target_name_pattern)
       if l ~= nil then
         table.insert(items,
           {
@@ -143,13 +144,15 @@ source._validate_option = function(_, params)
 end
 
 source._get_documentation = function(_, target_name, filename, max_lines)
-  local lncnt = max_lines / 2
+  local lncnt = math.floor((max_lines - 1) / 2)
   local cmd = "grep -E -A" ..
       lncnt .. " -B" .. lncnt .. " --color=none 'name\\s*=\\s*\"" .. target_name .. "\"' " .. filename
   local handle = io.popen(cmd)
   local text = handle:read "*a"
   handle:close()
-  return { kind = cmp.lsp.MarkupKind.Markdown, value = "```\n" .. text .. "\n```" }
+
+  text = "## " .. vim.fs.basename(filename) .. "\n```\n" .. text .. "\n```"
+  return { kind = cmp.lsp.MarkupKind.Markdown, value = text }
 end
 
 return source
