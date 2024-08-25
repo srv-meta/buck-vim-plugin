@@ -53,7 +53,7 @@ cmp.setup {
 
 ## Known issues and TODO:
 
-1. Target name needs to have match 'repo//path/to:target'. If there is no repo in the target name, plugin will not know how to find it. This can be fixed by supporting default_repo_path option.
+1. Target name needs to look like 'repo//path/to:target'. If there is no repo in the target name, plugin will not know how to find it. This can be fixed by supporting default_repo_path option.
 
 2. Currently plugin implements very simple heuristic to find a path for the repo. It uses path of the current buffer and look for a directory name in it matching 'repo'. This works well when you work in a single repo, but will fail otherwise. To fix this, support for a custom lookup table in the parameters can be added. Or maybe even some smart repo discovery logic.
 
