@@ -11,7 +11,7 @@ A plugin for VIM and NeoVim to simplify working with buck files
 ### Neovim
 
 - allows navigation to buck targets
-- adds completion extension for nvim-cmp
+- adds completion extension for [nvim-cmp](https://github.com/hrsh7th/nvim-cmp)
 
 ## Install
 
