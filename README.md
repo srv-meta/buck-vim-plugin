@@ -61,4 +61,4 @@ cmp.setup {
 
 ## Contributing
 
-You are welcome to submit issues, propose ideas and submit PRs. I'd be very especially happy to approve PRs fixing the issued from above. 
+You are welcome to submit issues, propose ideas and submit PRs. I'd be especially happy to approve PRs fixing the issues from above. 
