@@ -75,9 +75,18 @@ function BuckMapPath(path, verbose)
     "       First, lookup there and then try to guess from current path
 
     let repo = strpart(a:path, 0, dspos) 
+    " get buck root if repo is empty. Otherwise try to determine its path
+    let repopath = ""
     let curfilepath = expand("%:p:h")
+    if repo == ""
+        let repopath = trim(system('buck2 root --dir ' . curfilepath))
+        if repopath == ""
+            echoerr "Can't find buck root"
+        endif
+    else
 
-    let repopath = BuckGetRepoPathInGivenPath(curfilepath, repo)
+        let repopath = BuckGetRepoPathInGivenPath(curfilepath, repo)
+    endif
     if repopath == ""
         if a:verbose
             echoerr "Not aware of path for ".a:repo
@@ -93,7 +102,7 @@ function NavigateToTarget(tname)
     call cursor(1,1)
     let linenum = search('name = "'.a:tname.'"')
     if linenum == 0
-        3echow("target definition is not found in this file, it is probably constructed dynamically")
+        echoerr "target definition is not found in this file, it is probably constructed dynamically"
     endif
 endfunction
 
