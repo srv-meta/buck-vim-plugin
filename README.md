@@ -53,11 +53,9 @@ cmp.setup {
 
 ## Known issues and TODO:
 
-1. Target name needs to look like 'repo//path/to:target'. If there is no repo in the target name, plugin will not know how to identify it with `buck2 root` command. Not sure if it is enough for all setups, maybe manually searching for .buckconfig is better.
+1. Target name needs to look like 'repo//path/to:target'. If there is no repo in the target name, plugin will try to identify it with `buck2 root` command. Not sure if it is enough for all setups.
 
-2. Currently plugin implements very simple heuristic to find a path for the repo. It uses path of the current buffer and look for a directory name in it matching 'repo'. This works well when you work in a single repo, but will fail otherwise. To fix this, entries from `[repositories]` block of `.buckconfig` file need to be loaded.
-
-3. Only targets declared directly in TARGETS or BUCK files are found. If a target constructed dynamically using macro, the plugin will not find it. This can be solved by using 'buck targets' command to discover targets, but it will be quite slow. It is possible to add an option enabling this mode.
+2. Only targets declared directly in TARGETS or BUCK files are found. If a target constructed dynamically using macro, the plugin will not find it. This can be solved by using 'buck targets' command to discover targets, but it will be quite slow. It is possible to add an option enabling this mode.
 
 ## Contributing
 
