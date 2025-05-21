@@ -1,8 +1,5 @@
-" 1. Install this as a plugin into your vim using pathogen on something like
-" that. Or simply copy all the contents to your .vimrc
-" 2. define a hotkey for jumping to a target under cursor, e.g. add following
-" to your .vimrc to bind Ctrl+b for this:
-"   map <C-b> :exec("BuckOpenTarget")<CR>
+" Global variable to store repository mappings
+let g:buck_repositories = {}
 
 
 function BuckDetectLeftTargetPos(line, pos)
@@ -43,9 +40,9 @@ function BuckGetTarget(line, pos)
     if left == -1 || right == -1
         return ""
     endif
-    
+
     let target = strpart(a:line, left, right-left+1)
-    
+
     if stridx(target, ":") == -1
         return ""
     endif
@@ -63,6 +60,48 @@ function BuckGetRepoPathInGivenPath(givenpath, repo)
     return strpart(a:givenpath, 0, repopos+len(a:repo))
 endfunction
 
+function! BuckLoadConfig()
+  " Try to find .buckconfig in current or parent directories
+  let l:buckconfig_path = findfile('.buckconfig', '.;')
+  if empty(l:buckconfig_path)
+    return
+  endif
+
+  " Read the file
+  let l:lines = readfile(l:buckconfig_path)
+  let l:buckconfig_path = trim(system('dirname '. l:buckconfig_path))
+
+  " Parse the file
+  let l:current_section = ''
+  for l:line in l:lines
+    " Skip empty lines and comments
+    if l:line =~ '^\s*$' || l:line =~ '^\s*[#;]'
+      continue
+    endif
+
+    " Section header [section]
+    let l:section_matches = matchlist(l:line, '^\s*\[\(.*\)\]\s*$')
+    if !empty(l:section_matches)
+      let l:current_section = l:section_matches[1]
+      continue
+    endif
+
+
+    " Key-value pair
+    if l:line =~ '^\s*\([^=]*\)=\(.*\)$' && l:current_section ==? 'repositories'
+        let l:parts = split(l:line, '=', 1)
+        if len(l:parts) >= 2
+            " Trim whitespace from key and value
+            let l:key = substitute(l:parts[0], '^\s*\|\s*$', '', 'g')
+            let l:value = substitute(join(l:parts[1:], '='), '^\s*\|\s*$', '', 'g')
+            let l:value = substitute(l:value, './', l:buckconfig_path.'/', '')
+            let g:buck_repositories[l:key] = l:value
+        endif
+    endif
+  endfor
+endfunction
+command! BuckReloadConfig call BuckLoadConfig()
+
 " Tries to map a:path in a form of repo//path/to into a real filepath on the
 " filesytem
 function BuckMapPath(path, verbose)
@@ -70,9 +109,6 @@ function BuckMapPath(path, verbose)
     if dspos == -1
         return a:path
     endif
-
-    " TODO: Support user provided mapping through global vars.
-    "       First, lookup there and then try to guess from current path
 
     let repo = strpart(a:path, 0, dspos) 
     " get buck root if repo is empty. Otherwise try to determine its path
@@ -84,9 +120,17 @@ function BuckMapPath(path, verbose)
             echoerr "Can't find buck root"
         endif
     else
-
-        let repopath = BuckGetRepoPathInGivenPath(curfilepath, repo)
+        if empty(g:buck_repositories)
+            call BuckLoadConfig()
+        endif
+        " If we have this repository in our mappings, use it
+        if has_key(g:buck_repositories, repo)
+            let repopath = g:buck_repositories[repo]
+        else
+            let repopath = BuckGetRepoPathInGivenPath(curfilepath, repo)
+        endif
     endif
+
     if repopath == ""
         if a:verbose
             echoerr "Not aware of path for ".a:repo
@@ -116,7 +160,7 @@ function BuckOpenTarget()
 
     let tpath = strpart(target, 0, stridx(target, ":"))
     let tname = strpart(target, stridx(target, ":")+1)
-    
+
     if tpath == ""
         call NavigateToTarget(tname)
         return
@@ -126,7 +170,7 @@ function BuckOpenTarget()
     if tpath == ""
         return
     endif
-    
+
     let filename=""
     if filereadable(tpath."/TARGETS")
         let filename = tpath."/TARGETS"
